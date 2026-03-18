@@ -132,18 +132,7 @@ router.patch('/:id/reject', authenticate, async (req, res, next) => {
 // GET /api/users
 router.get('/', authenticate, async (req, res, next) => {
   try {
-    const { role, zoneId, branchId, id } = req.user;
-    let filter = { status: 'APPROVED' };
-
-    if (role === 'OWNER') {
-      // all users
-    } else if (role === 'REGIONAL_MANAGER') {
-      filter.zoneId = zoneId;
-    } else if (role === 'MANAGER') {
-      filter.branchId = branchId;
-    } else {
-      filter._id = id;
-    }
+    const filter = { status: 'APPROVED', ...buildScopeFilter(req.user) };
 
     const users = await User.find(filter)
       .select('-passwordHash -resetToken -resetTokenExpiry')
